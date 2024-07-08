@@ -104,8 +104,10 @@ func scaleDeployment(scaler *apiv1alpha1.Scaler, r *ScalerReconciler, ctx contex
 			err := r.Update(ctx, dep)
 			if err != nil {
 				log.Log.Error(err, "Failed to update Deployment")
+				scaler.Status.Status = apiv1alpha1.FAILED
 				return nil
 			}
+			scaler.Status.Status = apiv1alpha1.SUCCESS
 
 			err = r.Status().Update(ctx, scaler)
 			if err != nil {
