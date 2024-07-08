@@ -33,9 +33,19 @@ type ScalerSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Start       int              `json:"start"`
-	End         int              `json:"end"`
-	Replicas    int32            `json:"replicas"`
+	// +kubebuilder:validation:Maximum=23
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Required
+	Start int `json:"start"`
+
+	// +kubebuilder:validation:Maximum=23
+	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Required
+	End int `json:"end"`
+
+	// +kubebuilder:validation:Required
+	Replicas int32 `json:"replicas"`
+
 	Deployments []NamespacedName `json:"deployments"`
 }
 
