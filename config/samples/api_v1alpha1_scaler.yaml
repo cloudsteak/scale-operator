@@ -7,7 +7,7 @@ metadata:
   name: scaler-sample
 spec:
   start: 5 # UTC time
-  end: 10 # UTC time
+  end: 17 # UTC time
   replicas: 2
   deployments:
     - name: nginx
