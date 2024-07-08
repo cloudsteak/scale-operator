@@ -7,4 +7,14 @@ layout:
 - go.kubebuilder.io/v4
 projectName: scale-operator
 repo: github.com/cloudsteak/scale-operator.git
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: scaler.cloudsteak.com
+  group: api
+  kind: Scaler
+  path: github.com/cloudsteak/scale-operator.git/api/v1alpha1
+  version: v1alpha1
 version: "3"
