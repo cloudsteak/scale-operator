@@ -12,6 +12,5 @@ spec:
   deployments:
     - name: nginx
       namespace: nginx
-    - name: httpbin
-      namespace: httpbin-ok
+
 
