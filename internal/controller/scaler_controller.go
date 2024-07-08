@@ -18,8 +18,12 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	v1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -47,11 +51,70 @@ type ScalerReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.18.2/pkg/reconcile
 func (r *ScalerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	l := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	l.Info("Reconciling Scaler", "name", req.NamespacedName, "namespace", req.Namespace)
 
-	return ctrl.Result{}, nil
+	scaler := &apiv1alpha1.Scaler{}
+	err := r.Get(ctx, req.NamespacedName, scaler)
+	if err != nil {
+		l.Error(err, "Failed to get Scaler")
+		return ctrl.Result{}, nil
+	}
+
+	// Define the start and end time for scaling
+	startTime := scaler.Spec.Start
+	endTime := scaler.Spec.End
+
+	// Get the current hour
+	currentHour := time.Now().UTC().Hour()
+
+	l.Info(fmt.Sprintf("############## Current hour: %d", currentHour))
+
+	if currentHour >= startTime && currentHour <= endTime {
+		l.Info("--- Scaling up deployments")
+		if err = scaleDeployment(scaler, r, ctx, int32(scaler.Spec.Replicas)); err != nil {
+			return ctrl.Result{}, err
+		}
+	} else {
+		l.Info("--- Scaling down deployments")
+		if err = scaleDeployment(scaler, r, ctx, 1); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	return ctrl.Result{RequeueAfter: time.Duration(30 * time.Second)}, nil
+}
+
+func scaleDeployment(scaler *apiv1alpha1.Scaler, r *ScalerReconciler, ctx context.Context, replicas int32) error {
+	for _, deploy := range scaler.Spec.Deployments {
+		dep := &v1.Deployment{}
+		err := r.Get(ctx, types.NamespacedName{
+			Name:      deploy.Name,
+			Namespace: deploy.Namespace,
+		}, dep)
+		if err != nil {
+			log.Log.Error(err, "Failed to get Deployment")
+			return nil
+		}
+
+		if dep.Spec.Replicas != &replicas {
+			log.Log.Info("Scaling Deployment", "name", dep.Name, "namespace", dep.Namespace, "replicas_to", replicas, "replicas_from", dep.Spec.Replicas)
+			dep.Spec.Replicas = &replicas
+			err := r.Update(ctx, dep)
+			if err != nil {
+				log.Log.Error(err, "Failed to update Deployment")
+				return nil
+			}
+
+			err = r.Status().Update(ctx, scaler)
+			if err != nil {
+				log.Log.Error(err, "Failed to update Scaler status")
+				return nil
+			}
+		}
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

@@ -27,3 +27,23 @@ make generate
 ```bash
 make manifests
 ```
+
+5. Develop your code
+
+6. Install CRDs
+
+```bash
+make install
+```
+
+7. Create scaler
+
+```bash
+kubectl apply -f config/samples/api_v1alpha1_scaler.yaml
+```
+
+8. Run the controller
+
+```bash
+make run
+```
