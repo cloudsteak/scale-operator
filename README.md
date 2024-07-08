@@ -1,6 +1,6 @@
 # scale-operator
-Kubernetes time based scale operator
 
+Kubernetes time based scale operator
 
 ## Commands
 
@@ -16,16 +16,14 @@ kubebuilder init --domain scaler.cloudsteak.com --owner "CloudSteak" --repo gith
 kubebuilder create api --kind Scaler --version v1alpha1 --group api
 ```
 
-3. Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations. 
+3. Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 
 ```bash
 make generate
 ```
-
 
 4. Create manifests (CRD, RBAC and Controller)
 
 ```bash
 make manifests
 ```
-
