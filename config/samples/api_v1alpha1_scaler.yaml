@@ -1,0 +1,16 @@
+apiVersion: api.scaler.cloudsteak.com/v1alpha1
+kind: Scaler
+metadata:
+  labels:
+    app.kubernetes.io/name: scale-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: scaler-sample
+spec:
+  start: 5 # UTC time
+  end: 17 # UTC time
+  replicas: 2
+  deployments:
+    - name: nginx
+      namespace: nginx
+
+
